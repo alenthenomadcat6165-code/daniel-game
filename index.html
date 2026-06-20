@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fun Learning Homework Help</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="site-header">
+        <div>
+          <p class="kicker">three tiny games</p>
+          <h1>Pixel Party</h1>
+        </div>
+        <div class="header-actions">
+          <button class="quiet-button back-button" id="backToMenu" type="button" hidden>Menu</button>
+          <button class="quiet-button" id="resetAll" type="button">Reset</button>
+        </div>
+      </header>
+
+      <section class="game-grid" aria-label="Pixel Party games">
+        <article class="game-card clicker-card" data-game="cat" tabindex="0" role="button" aria-label="Enter Cat Clicker">
+          <div class="game-heading">
+            <div>
+              <p class="game-number">01</p>
+              <h2>Cat Clicker</h2>
+            </div>
+            <p class="score-pill"><span id="catScore">0</span> pats</p>
+          </div>
+
+          <button class="cat-stage" id="catButton" type="button" aria-label="Pat the cat">
+            <span class="cat">
+              <span class="ear left-ear"></span>
+              <span class="ear right-ear"></span>
+              <span class="face">
+                <span class="eye left-eye"></span>
+                <span class="eye right-eye"></span>
+                <span class="nose"></span>
+                <span class="mouth"></span>
+              </span>
+            </span>
+          </button>
+
+          <div class="game-footer">
+            <span id="catRank">sleepy starter</span>
+            <button class="small-button" id="catBoost" type="button">Treat x2</button>
+          </div>
+        </article>
+
+        <article class="game-card racer-card" data-game="racer" tabindex="0" role="button" aria-label="Enter Mini Racer">
+          <div class="game-heading">
+            <div>
+              <p class="game-number">02</p>
+              <h2>Mini Racer</h2>
+            </div>
+            <p class="score-pill"><span id="raceScore">0</span> m</p>
+          </div>
+
+          <div class="race-track" id="raceTrack" tabindex="0" aria-label="Car racing game. Use left and right arrow keys.">
+            <div class="road-line line-a"></div>
+            <div class="road-line line-b"></div>
+            <div class="road-line line-c"></div>
+            <div class="car player-car" id="playerCar">
+              <span></span>
+            </div>
+            <div class="car traffic-car" id="trafficCar">
+              <span></span>
+            </div>
+            <div class="race-message" id="raceMessage">click track, steer with arrows</div>
+          </div>
+
+          <div class="game-footer">
+            <span id="raceStatus">ready</span>
+            <button class="small-button" id="raceStart" type="button">Start</button>
+          </div>
+        </article>
+
+        <article class="game-card puzzle-card" data-game="merge" tabindex="0" role="button" aria-label="Enter Merge 2048">
+          <div class="game-heading">
+            <div>
+              <p class="game-number">03</p>
+              <h2>Merge 2048</h2>
+            </div>
+            <p class="score-pill"><span id="mergeScore">0</span> pts</p>
+          </div>
+
+          <div class="merge-board" id="mergeBoard" tabindex="0" aria-label="2048 style merge board. Use arrow keys."></div>
+
+          <div class="game-footer">
+            <span id="mergeStatus">join the numbers</span>
+            <button class="small-button" id="mergeNew" type="button">New</button>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
