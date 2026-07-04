@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fun Learning Homework Help</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="page-shell shop-shell">
+      <header class="site-header">
+        <div>
+          <p class="kicker">spend game points</p>
+          <h1>Shop</h1>
+        </div>
+        <div class="header-actions">
+          <p class="wallet-pill"><span id="walletPoints">0</span> points</p>
+          <a class="quiet-link" href="index.html">Games</a>
+        </div>
+      </header>
+
+      <section class="shop-grid" aria-label="Point shop">
+        <article class="shop-item">
+          <div>
+            <p class="game-number">style item</p>
+            <h2>Super Retro Mode</h2>
+          </div>
+          <div class="retro-preview" aria-hidden="true">
+            <span>PIXEL</span>
+            <span>PARTY</span>
+          </div>
+          <p class="shop-copy">Unlocks a bright old-school arcade look for the whole website.</p>
+          <div class="shop-actions">
+            <p class="price-pill">75 points</p>
+            <button class="small-button" id="retroShopButton" type="button">Buy</button>
+          </div>
+          <p class="shop-status" id="shopStatus">Earn points by playing games.</p>
+        </article>
+      </section>
+    </main>
+
+    <script src="shop.js"></script>
+  </body>
+</html>

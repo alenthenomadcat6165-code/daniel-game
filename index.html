@@ -14,6 +14,8 @@
           <h1>Pixel Party</h1>
         </div>
         <div class="header-actions">
+          <p class="wallet-pill"><span id="walletPoints">0</span> points</p>
+          <a class="quiet-link" href="shop.html">Shop</a>
           <button class="quiet-button back-button" id="backToMenu" type="button" hidden>Menu</button>
           <button class="quiet-button" id="resetAll" type="button">Reset</button>
         </div>
@@ -29,18 +31,28 @@
             <p class="score-pill"><span id="catScore">0</span> pats</p>
           </div>
 
-          <button class="cat-stage" id="catButton" type="button" aria-label="Pat the cat">
-            <span class="cat">
-              <span class="ear left-ear"></span>
-              <span class="ear right-ear"></span>
-              <span class="face">
-                <span class="eye left-eye"></span>
-                <span class="eye right-eye"></span>
-                <span class="nose"></span>
-                <span class="mouth"></span>
+          <div class="cat-play-area">
+            <button class="cat-stage" id="catButton" type="button" aria-label="Pat the cat">
+              <span class="cat">
+                <span class="ear left-ear"></span>
+                <span class="ear right-ear"></span>
+                <span class="face">
+                  <span class="eye left-eye"></span>
+                  <span class="eye right-eye"></span>
+                  <span class="nose"></span>
+                  <span class="mouth"></span>
+                </span>
               </span>
-            </span>
-          </button>
+            </button>
+            <aside class="cat-help" aria-label="Cat Clicker descriptions">
+              <h3>What things mean</h3>
+              <p><strong>Cat</strong> Click the cat to earn pats.</p>
+              <p><strong>Points</strong> Every 5 pats gives 1 shop point.</p>
+              <p><strong>Pats</strong> Your score for this game.</p>
+              <p><strong>Treat x2</strong> Costs 15 pats and doubles each click.</p>
+              <p><strong>Rank</strong> Changes as your score goes up.</p>
+            </aside>
+          </div>
 
           <div class="game-footer">
             <span id="catRank">sleepy starter</span>
@@ -58,6 +70,17 @@
           </div>
 
           <div class="race-track" id="raceTrack" tabindex="0" aria-label="Car racing game. Use left and right arrow keys.">
+            <div class="grass-strip left-grass">
+              <span class="tree tree-a"></span>
+              <span class="tree tree-b"></span>
+              <span class="tree tree-c"></span>
+            </div>
+            <div class="grass-strip right-grass">
+              <span class="tree tree-d"></span>
+              <span class="tree tree-e"></span>
+              <span class="tree tree-f"></span>
+            </div>
+            <div class="road-surface"></div>
             <div class="road-line line-a"></div>
             <div class="road-line line-b"></div>
             <div class="road-line line-c"></div>

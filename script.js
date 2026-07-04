@@ -5,6 +5,7 @@ const catBoost = document.querySelector("#catBoost");
 const resetAll = document.querySelector("#resetAll");
 const backToMenu = document.querySelector("#backToMenu");
 const gameCards = [...document.querySelectorAll(".game-card")];
+const walletPointsEl = document.querySelector("#walletPoints");
 
 const raceTrack = document.querySelector("#raceTrack");
 const playerCar = document.querySelector("#playerCar");
@@ -19,8 +20,37 @@ const mergeScoreEl = document.querySelector("#mergeScore");
 const mergeStatus = document.querySelector("#mergeStatus");
 const mergeNew = document.querySelector("#mergeNew");
 
+const STORAGE_KEYS = {
+  points: "pixelPartyPoints",
+  retroOwned: "pixelPartyRetroOwned",
+  retroOn: "pixelPartyRetroOn",
+};
+
+function readNumber(key, fallback = 0) {
+  const value = Number(localStorage.getItem(key));
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function updateWallet() {
+  walletPointsEl.textContent = readNumber(STORAGE_KEYS.points);
+}
+
+function addWalletPoints(amount) {
+  if (amount <= 0) return;
+  const next = readNumber(STORAGE_KEYS.points) + amount;
+  localStorage.setItem(STORAGE_KEYS.points, String(next));
+  updateWallet();
+}
+
+function applySavedTheme() {
+  const ownsRetro = localStorage.getItem(STORAGE_KEYS.retroOwned) === "true";
+  const retroOn = localStorage.getItem(STORAGE_KEYS.retroOn) === "true";
+  document.body.classList.toggle("retro-theme", ownsRetro && retroOn);
+}
+
 let catScore = 0;
 let catPower = 1;
+let catPointSteps = 0;
 
 function updateCat() {
   catScoreEl.textContent = catScore;
@@ -32,6 +62,9 @@ function updateCat() {
 
 catButton.addEventListener("click", () => {
   catScore += catPower;
+  const nextSteps = Math.floor(catScore / 5);
+  addWalletPoints(nextSteps - catPointSteps);
+  catPointSteps = nextSteps;
   catButton.classList.remove("cat-pop");
   window.requestAnimationFrame(() => catButton.classList.add("cat-pop"));
   updateCat();
@@ -64,15 +97,18 @@ function placeCars() {
 function updateRaceLanes() {
   const trackWidth = raceTrack.clientWidth || 238;
   const carWidth = playerCar.offsetWidth || 44;
+  const roadLeft = trackWidth * 0.18;
+  const roadWidth = trackWidth * 0.64;
   lanes = [
-    Math.max(10, trackWidth * 0.18 - carWidth / 2),
-    Math.max(10, trackWidth * 0.5 - carWidth / 2),
-    Math.max(10, trackWidth * 0.82 - carWidth / 2),
+    Math.max(10, roadLeft + roadWidth * 0.2 - carWidth / 2),
+    Math.max(10, roadLeft + roadWidth * 0.5 - carWidth / 2),
+    Math.max(10, roadLeft + roadWidth * 0.8 - carWidth / 2),
   ];
 }
 
 function resetRace() {
   racing = false;
+  updateRaceLanes();
   playerLane = 1;
   trafficLane = Math.floor(Math.random() * lanes.length);
   trafficY = -86;
@@ -101,6 +137,7 @@ function raceLoop() {
     trafficY = -86;
     trafficLane = Math.floor(Math.random() * lanes.length);
     raceScore += 10;
+    addWalletPoints(1);
     raceSpeed = Math.min(7.5, raceSpeed + 0.18);
     raceScoreEl.textContent = raceScore;
   }
@@ -155,31 +192,72 @@ function addTile() {
   if (!cells.length) return;
   const spot = cells[Math.floor(Math.random() * cells.length)];
   board[spot] = Math.random() > 0.88 ? 4 : 2;
+  return spot;
 }
 
-function renderBoard() {
+function tilePositions() {
+  return board
+    .map((value, index) => ({
+      value,
+      index,
+      row: Math.floor(index / 4),
+      col: index % 4,
+    }))
+    .filter((tile) => tile.value);
+}
+
+function renderBoard(previousPositions = [], newIndex = -1, sourceMap = {}) {
+  const oldMatches = previousPositions.map((tile) => ({ ...tile, used: false }));
   mergeBoard.innerHTML = "";
-  board.forEach((value) => {
+  for (let row = 0; row < 4; row += 1) {
+    for (let col = 0; col < 4; col += 1) {
+      const cell = document.createElement("div");
+      cell.className = "merge-cell";
+      cell.style.setProperty("--row", row);
+      cell.style.setProperty("--col", col);
+      mergeBoard.append(cell);
+    }
+  }
+
+  tilePositions().forEach((tileData) => {
+    const sourceIndex = sourceMap[tileData.index];
+    let old = null;
+    if (tileData.index !== newIndex) {
+      old = oldMatches.find((match) => match.index === sourceIndex);
+      if (!old) old = oldMatches.find((match) => !match.used && match.value === tileData.value);
+    }
+    if (old) old.used = true;
+
     const tile = document.createElement("div");
     tile.className = "tile";
-    if (value) {
-      tile.textContent = value;
-      tile.classList.add(`tile-${value}`);
+    tile.textContent = tileData.value;
+    tile.classList.add(`tile-${tileData.value}`);
+    tile.style.setProperty("--row", old ? old.row : tileData.row);
+    tile.style.setProperty("--col", old ? old.col : tileData.col);
+
+    if (!old || tileData.index === newIndex) {
+      tile.classList.add("tile-new");
     }
+
     mergeBoard.append(tile);
+
+    window.requestAnimationFrame(() => {
+      tile.style.setProperty("--row", tileData.row);
+      tile.style.setProperty("--col", tileData.col);
+    });
   });
   mergeScoreEl.textContent = mergeScore;
 }
 
 function compressLine(line) {
-  const clean = line.filter(Boolean);
+  const clean = line.filter((item) => item.value);
   const merged = [];
   let gained = 0;
 
   for (let i = 0; i < clean.length; i += 1) {
-    if (clean[i] === clean[i + 1]) {
-      const value = clean[i] * 2;
-      merged.push(value);
+    if (clean[i + 1] && clean[i].value === clean[i + 1].value) {
+      const value = clean[i].value * 2;
+      merged.push({ value, from: clean[i].index });
       gained += value;
       i += 1;
     } else {
@@ -187,38 +265,44 @@ function compressLine(line) {
     }
   }
 
-  while (merged.length < 4) merged.push(0);
+  while (merged.length < 4) merged.push({ value: 0, from: -1 });
   return { line: merged, gained };
 }
 
 function moveBoard(direction) {
   const old = board.join(",");
+  const previousPositions = tilePositions();
   let gained = 0;
   const next = Array(16).fill(0);
+  const sourceMap = {};
 
   for (let i = 0; i < 4; i += 1) {
     let line;
-    if (direction === "left") line = [0, 1, 2, 3].map((x) => board[i * 4 + x]);
-    if (direction === "right") line = [3, 2, 1, 0].map((x) => board[i * 4 + x]);
-    if (direction === "up") line = [0, 1, 2, 3].map((y) => board[y * 4 + i]);
-    if (direction === "down") line = [3, 2, 1, 0].map((y) => board[y * 4 + i]);
+    if (direction === "left") line = [0, 1, 2, 3].map((x) => ({ value: board[i * 4 + x], index: i * 4 + x }));
+    if (direction === "right") line = [3, 2, 1, 0].map((x) => ({ value: board[i * 4 + x], index: i * 4 + x }));
+    if (direction === "up") line = [0, 1, 2, 3].map((y) => ({ value: board[y * 4 + i], index: y * 4 + i }));
+    if (direction === "down") line = [3, 2, 1, 0].map((y) => ({ value: board[y * 4 + i], index: y * 4 + i }));
 
     const result = compressLine(line);
     gained += result.gained;
 
-    result.line.forEach((value, index) => {
-      if (direction === "left") next[i * 4 + index] = value;
-      if (direction === "right") next[i * 4 + (3 - index)] = value;
-      if (direction === "up") next[index * 4 + i] = value;
-      if (direction === "down") next[(3 - index) * 4 + i] = value;
+    result.line.forEach((tile, index) => {
+      let targetIndex;
+      if (direction === "left") targetIndex = i * 4 + index;
+      if (direction === "right") targetIndex = i * 4 + (3 - index);
+      if (direction === "up") targetIndex = index * 4 + i;
+      if (direction === "down") targetIndex = (3 - index) * 4 + i;
+      next[targetIndex] = tile.value;
+      sourceMap[targetIndex] = tile.from;
     });
   }
 
   board = next;
   if (board.join(",") === old) return;
   mergeScore += gained;
-  addTile();
-  renderBoard();
+  addWalletPoints(Math.max(1, Math.floor(gained / 8)));
+  const newIndex = addTile();
+  renderBoard(previousPositions, newIndex, sourceMap);
   updateMergeStatus();
 }
 
@@ -268,6 +352,7 @@ mergeNew.addEventListener("click", () => {
 resetAll.addEventListener("click", () => {
   catScore = 0;
   catPower = 1;
+  catPointSteps = 0;
   catBoost.textContent = "Treat x2";
   updateCat();
   resetRace();
@@ -334,6 +419,8 @@ window.addEventListener("resize", () => {
   placeCars();
 });
 
+applySavedTheme();
+updateWallet();
 updateCat();
 resetRace();
 newMergeGame();
